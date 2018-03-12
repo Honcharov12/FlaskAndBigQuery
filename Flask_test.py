@@ -6,6 +6,7 @@ from bigquery import get_client
 import os
 import json
 import time
+import ast
 
 
 def wait_until(somepredicate, timeout, period=0.25, *args, **kwargs):
@@ -20,18 +21,12 @@ def wait_until(somepredicate, timeout, period=0.25, *args, **kwargs):
 app = Flask(__name__)
 
 
-@app.route('/hello')
-def hello_world():
-    return 'Hello World!'
-
-
-@app.route('/querytest')
 def qtest():
-    json_key = os.path.join(app.config['DATA_DIR'], 'My First Project-305866c8ff55.json')
+    json_key = os.path.join(os.getcwd() + "/data/", 'key.json')
     client = get_client(json_key_file=json_key, readonly=True)
 
     # Submit an async query.
-    job_id, _results = client.query('SELECT * FROM [gdelt-bq:internetarchivebooks.1800]  LIMIT 10')
+    job_id, _results = client.query('SELECT * FROM [bamboo-creek-195008:test2.Best_selling_10] LIMIT 1000')
 
     # Check if the query has finished running.
     complete, row_count = client.check_job(job_id)
@@ -43,14 +38,19 @@ def qtest():
 
 
 @app.route("/chart")
+@app.route("/")
 def chart():
-    labels = ["January", "February", "March", "April", "May", "June", "July", "August"]
-    values = [10, 9, 8, 7, 6, 4, 7, 8]
-    return render_template('lineChart.html', values=values, labels=labels)
+    s = qtest()
+    data = ast.literal_eval(s)
+    labels = []
+    values = []
+    for field in data:
+        labels.append(field['Name_of_product'])
+        values.append(field['Total_quantity'])
+    return render_template('chart.html', values=values, labels=labels)
 
 
 if __name__ == "__main__":
-    app.config['DATA_DIR'] = "/home/alexj/Projects/PycharmProjects/Flask_test/data"
     app.run(host='127.0.0.1', port=8001)
 
 
