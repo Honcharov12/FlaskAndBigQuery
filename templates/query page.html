@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='style.css') }}">
+
+</head>
+<body>
+
+<form action="" method="POST">
+Input: <input type="text" name="query" id="query">
+<input type="button" value="Submit" id="submitButton">
+</form>
+<div id="myDiv"></div>
+
+<script type=text/javascript src="{{ url_for('static', filename='fetchData.js') }}"></script>
+</body>
+</html>

@@ -2,6 +2,7 @@ from flask import Markup
 from flask import Flask
 from flask import render_template
 from bigquery import get_client
+from flask import (request, jsonify)
 
 import os
 import json
@@ -50,7 +51,22 @@ def chart():
     return render_template('chart.html', values=values, labels=labels)
 
 
+@app.route('/query')
+def queryPage():
+    return render_template('query page.html')
+
+
+# not implemented
+def executeQuery(query):
+    return None
+
+
+@app.route('/ajax', methods=['POST'])
+def ajax_request():
+    query = request.form['query']
+    res = executeQuery(query)
+    return jsonify(returnedData=res)
+
+
 if __name__ == "__main__":
     app.run(host='127.0.0.1', port=8001)
-
-
