@@ -3,12 +3,22 @@ from flask import Flask
 from flask import render_template
 from bigquery import get_client
 from flask import (request, jsonify)
+from flask_wtf import FlaskForm
+from wtforms import SelectField, SubmitField
+from wtforms.validators import DataRequired
 
 import os
 import json
 import time
 import ast
 
+choices_x = [("ProductID", "ProductID"), ("Quantity", "Quantity"), ("Price", "Price"), ("ProductName", "ProductName"), ("DCSS", "DCSS")]
+choices_y = [("ProductID", "ProductID"), ("Quantity", "Quantity"), ("Price", "Price")]
+
+class SelectForm(FlaskForm):
+    x_axes = SelectField("Choice 1: ", choices = choices_x)
+    y_axes = SelectField("Choice 2: ", choices = choices_y)
+    submit = SubmitField("Get Data")
 
 def wait_until(somepredicate, timeout, period=0.25, *args, **kwargs):
     mustend = time.time() + timeout
@@ -20,14 +30,16 @@ def wait_until(somepredicate, timeout, period=0.25, *args, **kwargs):
 
 
 app = Flask(__name__)
+app.secret_key = 'key'
 
 
-def qtest():
+def qtest(first, second):
+    print first, second
     json_key = os.path.join(os.getcwd() + "/data/", 'key.json')
     client = get_client(json_key_file=json_key, readonly=True)
 
     # Submit an async query.
-    job_id, _results = client.query('SELECT * FROM [bamboo-creek-195008:test2.Best_selling_10] LIMIT 1000')
+    job_id, _results = client.query('SELECT %s, %s FROM [bamboo-creek-195008:test2.OleSmokey3] LIMIT 10' % (first, second))
 
     # Check if the query has finished running.
     complete, row_count = client.check_job(job_id)
@@ -41,7 +53,6 @@ def qtest():
 @app.route("/chart")
 @app.route("/")
 def chart():
-    s = qtest()
     data = ast.literal_eval(s)
     labels = []
     values = []
@@ -51,9 +62,21 @@ def chart():
     return render_template('chart.html', values=values, labels=labels)
 
 
-@app.route('/query')
+@app.route('/query', methods = ['GET', 'POST'])
 def queryPage():
-    return render_template('query page.html')
+    form = SelectForm()
+
+    if request.method == 'POST':
+        s = qtest(form.x_axes.data, form.y_axes.data)
+        data = ast.literal_eval(s)
+        labels = []
+        values = []
+        for field in data:
+            labels.append(field[form.x_axes.data])
+            values.append(field[form.y_axes.data])
+        return render_template('chart.html', values=values, labels=labels)
+
+    return render_template('query_page.html', form=form)
 
 
 # not implemented
