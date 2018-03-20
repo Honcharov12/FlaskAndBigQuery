@@ -31,11 +31,10 @@ def wait_until(somepredicate, timeout, period=0.25, *args, **kwargs):
 
 app = Flask(__name__)
 app.secret_key = 'key'
+json_key = os.path.join(os.getcwd() + "/data/", 'key.json')
 
 
 def qtest(first, second):
-    print first, second
-    json_key = os.path.join(os.getcwd() + "/data/", 'key.json')
     client = get_client(json_key_file=json_key, readonly=True)
 
     # Submit an async query.
@@ -50,16 +49,6 @@ def qtest(first, second):
     return str(results)
 
 
-@app.route("/chart")
-@app.route("/")
-def chart():
-    data = ast.literal_eval(s)
-    labels = []
-    values = []
-    for field in data:
-        labels.append(field['Name_of_product'])
-        values.append(field['Total_quantity'])
-    return render_template('chart.html', values=values, labels=labels)
 
 
 @app.route('/query', methods = ['GET', 'POST'])
@@ -67,21 +56,22 @@ def queryPage():
     form = SelectForm()
 
     if request.method == 'POST':
-        s = qtest(form.x_axes.data, form.y_axes.data)
-        data = ast.literal_eval(s)
-        labels = []
-        values = []
-        for field in data:
-            labels.append(field[form.x_axes.data])
-            values.append(field[form.y_axes.data])
+        values, labels = executeQuery(form.x_axes.data, form.y_axes.data)
         return render_template('chart.html', values=values, labels=labels)
 
     return render_template('query_page.html', form=form)
 
 
 # not implemented
-def executeQuery(query):
-    return None
+def executeQuery(x, y):
+    s = qtest(x, y)
+    data = ast.literal_eval(s)
+    labels = []
+    values = []
+    for field in data:
+        labels.append(field[x])
+        values.append(field[y])
+    return labels, values
 
 
 @app.route('/ajax', methods=['POST'])
