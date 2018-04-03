@@ -62,7 +62,7 @@ def get_departments():
 
 def get_dates(department):
     request_departments = """SELECT DateTimeS FROM [bamboo-creek-195008:test2.SalesForLastYear] 
-    WHERE DATE(DateTimeS) >= "2017-01-01 00:00:00" AND DATE(DateTimeS) < "2018-01-01 00:00:00" AND Department = "%s" """ % (department)
+    WHERE Department = "%s" AND DATE(DateTimeS) >= "2017-01-01 00:00:00" AND DATE(DateTimeS) < "2018-01-01 00:00:00" """ % (department)
 
     client = get_client(json_key_file = json_key, readonly = True)
     
@@ -102,7 +102,6 @@ def queryPage2():
     form = StringForm()
 
     if request.method == 'POST':
-        print form.department.data
         if form.department.data == "":
             flash("Empty field is not required")
             return render_template('query_page2.html', form=form)
