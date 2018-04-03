@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Get data 2</title>
     <!--<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='style.css') }}"> --!>
 
 </head>
@@ -10,16 +10,9 @@
 
     <form action="" method="POST">
         <fieldset>
-            {{ form.x_axes.label }}
-            {{ form.x_axes }}
+            {{ form.department.label }}
+            {{ form.department(size=32) }}
 
-            <br />
-            <br />
-
-            {{ form.y_axes.label }}
-            {{ form.y_axes }}
-
-            <br />
             <br />
 
             {{ form.submit }}
