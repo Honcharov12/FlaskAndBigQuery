@@ -51,8 +51,8 @@ def get_departments():
     return res
 
 def get_dates(department):
-    request_departments = """SELECT DateTimeS FROM [bamboo-creek-195008:test2.SalesForLastYear] 
-    WHERE Department = "%s" AND DATE(DateTimeS) >= "2017-01-01 00:00:00" AND DATE(DateTimeS) < "2018-01-01 00:00:00" """ % (department)
+    request_departments = """SELECT DateTimeS, Quantity FROM [bamboo-creek-195008:test2.SalesForLastYear] 
+    WHERE Department = "%s" AND DATE(DateTimeS) >= "2017-01-01 00:00:00" AND DATE(DateTimeS) < "2018-01-01 00:00:00" AND Quantity > 0""" % (department)
 
     client = get_client(json_key_file = json_key, readonly = True)
     
@@ -65,7 +65,7 @@ def get_dates(department):
     results = client.get_query_rows(job_id)
     res = [0] * 53
     for el in results:
-        res[datetime.datetime.strptime(el['DateTimeS'][:10], "%Y-%m-%d").isocalendar()[1]] += 1
+        res[datetime.datetime.strptime(el['DateTimeS'][:10], "%Y-%m-%d").isocalendar()[1]] += el['Quantity']
 
     return res
 
